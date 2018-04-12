@@ -236,20 +236,23 @@ test('sync: #121 - treating an existing file as a dir when no basedir', function
     });
 
     t.test('with a trailing slash', function (st) {
-        function run() { return resolve.sync('./' + testFile + '/'); }
+        var path = './' + testFile + '/';
+        function run() { return resolve.sync(path); }
 
-        st.throws(run, 'throws an error');
-
+        var result, error;
         try {
-            run();
+            result = run();
         } catch (e) {
-            st.equal(e.code, 'MODULE_NOT_FOUND', 'error code matches require.resolve');
-            st.equal(
-                e.message,
-                'Cannot find module \'./' + testFile + '/\' from \'' + __dirname + '\'',
-                'can not find nonexistent module'
-            );
+            error = e;
         }
+        st.ok(error, 'there is an error');
+        st.notOk(result, 'no result');
+        st.equal(error && error.code, 'MODULE_NOT_FOUND', 'error code matches require.resolve');
+        st.equal(
+            error && error.message,
+            'Cannot find module \'' + path + '\' from \'' + __dirname + '\'',
+            'can not find nonexistent module'
+        );
 
         st.end();
     });
